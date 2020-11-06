@@ -103,10 +103,44 @@ class Saper(Timer, QMainWindow):
         if self.cells[row][col] == '1':
             self.the_end_game(row, col)
         else:
-            self.count_mines(row, col)
+            self.count_cells(row, col)
 
-    def count_mines(self, r, c):  # Подсчет сколько мин вокруг клетки
-        pass
+    def count_cells(self, r, c):  # Клетки, окружающие нажатую клетку
+        if r == 0 == c:  # Левая верхняя клетка
+            data = [self.cells[0][1], self.cells[1][2], self.cells[1][0]]
+        elif r == self.len_pole and c == 0:  # Левая нижняя
+            data = [self.cells[r - 1][0], self.cells[r - 1][1], self.cells[r][1]]
+        elif r == self.len_pole and c == self.len_pole:  # Правая нижняя
+            data = [self.cells[r][c - 1], self.cells[r - 1][c - 1], self.cells[r][c]]
+        elif r == 0 and c == self.len_pole:  # Верхняя правая
+            data = [self.cells[0][c - 1], self.cells[1][c - 1], self.cells[1][c]]
+        elif (0 < r < self.len_pole) and c == 0:  # Клетка в левом ряду
+            data = [self.cells[r + 1][0], self.cells[r - 1][0], self.cells[r + 1][1],
+                    self.cells[r - 1][1], self.cells[r][1]]
+        elif (0 < r < self.len_pole) and c == self.len_pole:  # Клетка в правом ряду
+            data = [self.cells[r + 1][c], self.cells[r - 1][c], self.cells[r + 1][c - 1],
+                    self.cells[r - 1][c - 1], self.cells[r][c - 1]]
+        elif r == self.len_pole and (0 < c < self.len_pole):  # Клетка в нижнем ряду
+            data = [self.cells[r][c - 1], self.cells[r][c + 1], self.cells[r - 1][c - 1],
+                    self.cells[r - 1][c], self.cells[r - 1][c + 1]]
+        elif r == 0 and (0 < c < self.len_pole):  # Клетка в верхнем ряду
+            data = [self.cells[r][c - 1], self.cells[r][c + 1], self.cells[r + 1][c - 1],
+                    self.cells[r + 1][c], self.cells[r + 1][c + 1]]
+        else:  # Любая другая клетка
+            data = [self.cells[r][c - 1], self.cells[r][c + 1], self.cells[r + 1][c - 1],
+                    self.cells[r + 1][c], self.cells[r + 1][c + 1], self.cells[r - 1][c - 1],
+                    self.cells[r - 1][c], self.cells[r - 1][c + 1]]
+        self.count_mines(data, r, c)
+
+    def count_mines(self, data, r, c):  # Подсчет сколько мин окружают клетку
+        kolvo_mine = 0
+        for elem in data:
+            if elem == '1':
+                kolvo_mine += 1
+        self.cell_print(r, c, kolvo_mine)
+
+    def cell_print(self, r, c, kolvo):
+        self.buttons[r][c].setText(str(kolvo))
 
     def the_end_game(self, r, c): # Проигрыш
         pass
