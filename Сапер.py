@@ -48,12 +48,12 @@ class Saper(Timer, QMainWindow):
         super(Saper, self).__init__()
         uic.loadUi('saper.ui', self)
 
-        self.buttons = []  # список всех кнопок
+        self.buttons = []  # список всех кнопок на игровом поле
 
-        self.pushButton.clicked.connect(self.new_game)
-        self.pushButton_2.clicked.connect(self.game_size)
-        self.pushButton_3.clicked.connect(self.game_size)
-        self.pushButton_4.clicked.connect(self.game_size)
+        self.reset_pole.clicked.connect(self.new_game)
+        self.level_1.clicked.connect(self.game_size)
+        self.level_2.clicked.connect(self.game_size)
+        self.level_3.clicked.connect(self.game_size)
 
     def game_size(self):  # Определение размера поля, количества мин
         if self.sender().text() == 'Новичок':
@@ -75,6 +75,7 @@ class Saper(Timer, QMainWindow):
             self.buttons.append([])
             for y in range(self.len_pole):
                 btn_pole = QPushButton(self)
+                btn_pole.clicked.connect(self.mine_or_no)
                 self.buttons[x] = self.buttons[x] + [btn_pole]
                 self.gridLayout.addWidget(btn_pole, x, y)
         self.lcdNumber.display(self.kolvo_mines)  # выводим количество мин на поле
@@ -88,10 +89,27 @@ class Saper(Timer, QMainWindow):
         self.cells = [['0' for j in range(self.len_pole)] for i in range(self.len_pole)]  # создаем список всех ячеек,
         # 0 - пустая клетка, 1 - мина
         for _ in range(self.kolvo_mines):
-            row, call = randrange(self.len_pole), randrange(self.len_pole)
-            while self.cells[row][call] != '0':
-                row, call = randrange(self.len_pole), randrange(self.len_pole)
-            self.cells[row][call] = '1'
+            row, col = randrange(self.len_pole), randrange(self.len_pole)
+            while self.cells[row][col] != '0':
+                row, col = randrange(self.len_pole), randrange(self.len_pole)
+            self.cells[row][col] = '1'
+
+    def mine_or_no(self):  # проверка мина или нет
+        for row_ in range(len(self.buttons)):
+            for i in range(len(self.buttons)):
+                if self.buttons[row_][i] == self.sender():
+                    row, col = row_, i
+                    break
+        if self.cells[row][col] == '1':
+            self.the_end_game(row, col)
+        else:
+            self.count_mines(row, col)
+
+    def count_mines(self, r, c):  # Подсчет сколько мин вокруг клетки
+        pass
+
+    def the_end_game(self, r, c): # Проигрыш
+        pass
 
 
 if __name__ == '__main__':
