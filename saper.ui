@@ -28,7 +28,7 @@
    <widget class="QPushButton" name="reset_pole">
     <property name="geometry">
      <rect>
-      <x>350</x>
+      <x>290</x>
       <y>60</y>
       <width>51</width>
       <height>51</height>
@@ -87,19 +87,6 @@
      <string>Профессионал</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_5">
-    <property name="geometry">
-     <rect>
-      <x>220</x>
-      <y>60</y>
-      <width>51</width>
-      <height>51</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>fl/h</string>
-    </property>
-   </widget>
    <widget class="QLCDNumber" name="timeViewer">
     <property name="geometry">
      <rect>
@@ -108,6 +95,24 @@
       <width>101</width>
       <height>51</height>
      </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label">
+    <property name="geometry">
+     <rect>
+      <x>160</x>
+      <y>600</y>
+      <width>371</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>10</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string/>
     </property>
    </widget>
   </widget>
