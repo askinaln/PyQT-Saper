@@ -49,6 +49,7 @@ class Saper(Timer, QMainWindow):
         self.timer = Timer(self.timeViewer)  # Таймер для игры
 
         self.reset_pole.clicked.connect(self.new_game)
+
         self.level_1.clicked.connect(self.game_size)
         self.level_2.clicked.connect(self.game_size)
         self.level_3.clicked.connect(self.game_size)
@@ -60,7 +61,7 @@ class Saper(Timer, QMainWindow):
             self.len_pole, self.kolvo_mines = LEVELS[1]
         elif self.sender().text() == 'Профессионал':
             self.len_pole, self.kolvo_mines = LEVELS[2]
-        self.kolvo_bad = self.kolvo_mines  # количество кнопок на которые уже нельзя нажимать
+        self.kolvo_bad = 0  # количество кнопок на которые уже нельзя нажимать
         self.new_game()
 
     def new_game(self):  # сброс всех полей, новая игра
@@ -99,18 +100,19 @@ class Saper(Timer, QMainWindow):
             self.cells[row][col] = '1'
 
     def mine_or_no(self):  # проверка мина или нет
+        self.kolvo_bad += 1  # количество кнопок, на которые уже нельзя нажать
         for row_ in range(self.len_pole):
             if self.sender() in self.buttons[row_]:
                 row, col = row_, self.buttons[row_].index(self.sender())
                 break
-        if self.cells[row][col] == '1':
+        if self.cells[row][col] == '1':  # если бомба
             self.the_end_game(row, col)
         else:
             self.count_cells(row, col)
 
-    def count_cells(self, r, c):  # Клетки, окружающие нажатую клетку
+    def count_cells(self, r, c, sit=True):  # Клетки, окружающие нажатую клетку
         if r == 0 == c:  # Левая верхняя клетка
-            data = [self.cells[0][1], self.cells[1][2], self.cells[1][0]]
+            data = [self.cells[0][1], self.cells[1][1], self.cells[1][0]]
         elif r == self.len_pole - 1 and c == 0:  # Левая нижняя
             data = [self.cells[r - 1][0], self.cells[r - 1][1], self.cells[r][1]]
         elif r == self.len_pole - 1 and c == self.len_pole - 1:  # Правая нижняя
@@ -133,38 +135,48 @@ class Saper(Timer, QMainWindow):
             data = [self.cells[r][c - 1], self.cells[r][c + 1], self.cells[r + 1][c - 1],
                     self.cells[r + 1][c], self.cells[r + 1][c + 1], self.cells[r - 1][c - 1],
                     self.cells[r - 1][c], self.cells[r - 1][c + 1]]
-        self.count_mines(data, r, c)
+        if sit:
+            self.count_mines(data, r, c)
+        return data
 
-    def count_mines(self, data, r, c):  # Подсчет сколько мин окружают клетку
+    def count_mines(self, data, r, c, sit=True):  # Подсчет сколько мин окружают клетку
         kolvo_mine = 0
         for elem in data:
             if elem == '1':
                 kolvo_mine += 1
-        self.cell_print(r, c, kolvo_mine)
+        if sit:
+            self.cell_print(r, c, kolvo_mine)
+        else:
+            self.cell_print(r, c, kolvo_mine, False)
 
-    def cell_print(self, r, c, kolvo):  # Вывод информации на клетку
+    def cell_print(self, r, c, kolvo, sit=True):  # Вывод информации на клетку
         self.buttons[r][c].setText(str(kolvo))
         self.buttons[r][c].setEnabled(False)
-        self.kolvo_bad += 1
-        self.kolvo_operating_buttons()
+        if sit:
+            self.kolvo_operating_buttons()
 
     def kolvo_operating_buttons(self):  # Подсчет - выиграл ли игрок
-        if self.kolvo_bad == self.len_pole * self.len_pole:
+        if self.kolvo_bad == (self.len_pole * self.len_pole - self.kolvo_mines):
             self.the_end_game()
 
     def the_end_game(self, r=None, c=None):  # Конец игры
-        for row in self.buttons:
-            for btn in row:
-                btn.setEnabled(False)
-        self.opening()
         if r is None:
             self.label.setText('Поздравляю! Ты выиграл!')
         else:
             self.label.setText('Ты проиграл!')
+        self.opening()
         self.timer_(False)
 
-    def opening(self):  # Вскрытие всех клеток, в случае проигрыша\выигрыша
-        pass
+    def opening(self):  # Вскрытие всех клеток в конце игры.
+        for row in range(self.len_pole):
+            for col in range(self.len_pole):
+                if self.cells[row][col] != '1':
+                    data = self.count_cells(row, col, False)
+                    self.count_mines(data, row, col, False)
+                else:
+                    self.buttons[row][col].setStyleSheet('QPushButton {background-color: red; color: white;}')
+                    self.buttons[row][col].setText('Б')
+                    self.buttons[row][col].setEnabled(False)
 
 
 if __name__ == '__main__':
