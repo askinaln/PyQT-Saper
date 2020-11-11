@@ -2,6 +2,7 @@ import sys
 
 from PyQt5 import uic, QtCore
 from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton
+import sqlite3
 from random import randrange
 
 LEVELS = [(8, 10), (16, 40), (20, 70)]  # новичок, любитель, профессионал (длина поля, кол-во мин)
@@ -162,9 +163,12 @@ class Saper(Timer, QMainWindow):
     def the_end_game(self, r=None, c=None):  # Конец игры
         if r is None:
             self.label.setText('Поздравляю! Ты выиграл!')
+            type_rezult = 'Победы'
         else:
             self.label.setText('Ты проиграл!')
+            type_rezult = 'Поражения'
         self.opening()
+        self.counter(type_rezult)
         self.timer_(False)
 
     def opening(self):  # Вскрытие всех клеток в конце игры.
@@ -177,6 +181,17 @@ class Saper(Timer, QMainWindow):
                     self.buttons[row][col].setStyleSheet('QPushButton {background-color: red; color: white;}')
                     self.buttons[row][col].setText('Б')
                     self.buttons[row][col].setEnabled(False)
+
+    def counter(self, type_rezult):  # База Данных с количеством побед и проигрышей
+        con = sqlite3.connect('saper.db')
+        cur = con.cursor()
+
+        cur.execute(f"""UPDATE Counter
+            SET count = count + 1
+            WHERE type = '{type_rezult}'""")
+        con.commit()
+
+        con.close()
 
 
 if __name__ == '__main__':
