@@ -8,7 +8,7 @@ from random import randrange
 LEVELS = [(8, 10), (16, 40), (20, 70)]  # новичок, любитель, профессионал (длина поля, кол-во мин)
 
 
-class Timer(QMainWindow):
+class Timer(QMainWindow):  # Таймер
     timeout = QtCore.pyqtSignal()
 
     def __init__(self, lcd=None):
@@ -35,12 +35,8 @@ class Timer(QMainWindow):
         self.time = int
         self.timeViewer.display(self.time)
 
-    def reset(self):
-        self.time = 0
-        self.settimer(self.time)
 
-
-class Saper(Timer, QMainWindow):
+class Saper(Timer, QMainWindow):  # Основной класс игры
     def __init__(self):
         super(Saper, self).__init__()
         uic.loadUi('saper.ui', self)
@@ -65,9 +61,15 @@ class Saper(Timer, QMainWindow):
         self.kolvo_bad = 0  # количество кнопок на которые уже нельзя нажимать
         self.new_game()
 
-    def new_game(self):  # сброс всех полей, новая игра
+    def new_game(self):  # новая игра
+        self.new_pole()  # обновление игрового поля
+        self.label.setText(' ' * 30)  # стираем фразы о победе\поражении
+        self.lcdNumber.display(self.kolvo_mines)  # выводим количество мин на табло
+        self.mines_spread()  # разбрасываем мины на поле
+        self.timer_(True)  # начинаем отсчет времени игры
+
+    def new_pole(self):  # сброс всех полей, новая игра
         # self.gridLayout.
-        self.label.setText(' ' * 30)
         for row in self.buttons:
             for elem in row:
                 self.gridLayout.removeWidget(elem)
@@ -80,9 +82,6 @@ class Saper(Timer, QMainWindow):
                 btn_pole.clicked.connect(self.mine_or_no)
                 self.buttons[x] = self.buttons[x] + [btn_pole]
                 self.gridLayout.addWidget(btn_pole, x, y)
-        self.lcdNumber.display(self.kolvo_mines)  # выводим количество мин на поле
-        self.mines_spread()  # разбрасываем мины на поле
-        self.timer_(True)  # начинаем отсчет времени игры
 
     def timer_(self, sit):  # Начало\конец отсчета время игры
         if sit:
@@ -95,7 +94,7 @@ class Saper(Timer, QMainWindow):
         self.cells = [['0' for j in range(self.len_pole)] for i in range(self.len_pole)]  # создаем список всех ячеек,
         # 0 - пустая клетка, 1 - мина
         for _ in range(self.kolvo_mines):
-            row, col = randrange(self.len_pole), randrange(self.len_pole)
+            row, col = randrange(self.len_pole), randrange(self.len_pole)  # выбираем рандомное место
             while self.cells[row][col] != '0':
                 row, col = randrange(self.len_pole), randrange(self.len_pole)
             self.cells[row][col] = '1'
@@ -148,6 +147,7 @@ class Saper(Timer, QMainWindow):
         if sit:
             self.cell_print(r, c, kolvo_mine)
         else:
+            # False - конец игры -> подсчитывать выиграл ли игрок не надо
             self.cell_print(r, c, kolvo_mine, False)
 
     def cell_print(self, r, c, kolvo, sit=True):  # Вывод информации на клетку
@@ -167,9 +167,9 @@ class Saper(Timer, QMainWindow):
         else:
             self.label.setText('Ты проиграл!')
             type_rezult = 'Поражения'
-        self.opening()
-        self.counter(type_rezult)
-        self.timer_(False)
+        self.opening()  # Раскрываем все клетки поля
+        self.counter(type_rezult)  # Изменяем БД
+        self.timer_(False)  # Останавливаем время
 
     def opening(self):  # Вскрытие всех клеток в конце игры.
         for row in range(self.len_pole):
@@ -189,8 +189,8 @@ class Saper(Timer, QMainWindow):
         cur.execute(f"""UPDATE Counter
             SET count = count + 1
             WHERE type = '{type_rezult}'""")
-        con.commit()
 
+        con.commit()
         con.close()
 
 
